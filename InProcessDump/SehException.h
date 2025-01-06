@@ -34,7 +34,7 @@ private:
 	HANDLE dump_finish_semaphore_;
 	std::wstring dump_path_str_;
 	const wchar_t* dump_path_;
-	bool terminate_;
+	volatile bool terminate_;
 
 	void WriteMiniDump(EXCEPTION_POINTERS* ep);
 

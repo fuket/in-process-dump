@@ -22,15 +22,15 @@ SehException::SehException()
 
 	if (pf_mini_dump_write_dump_ != NULL)
 	{
+		dump_start_semaphore_ = CreateSemaphore(NULL, 0, 1, NULL);
+		dump_finish_semaphore_ = CreateSemaphore(NULL, 0, 1, NULL);
+	}
+
+	if (dump_start_semaphore_ != NULL && dump_finish_semaphore_ != NULL)
+	{
 		DWORD thread_id;
 		const size_t kStackSize = 64 * 1024;
 		thread_ = CreateThread(NULL, kStackSize, WriteMiniDump, this, 0, &thread_id);
-	}
-
-	if (thread_ != NULL)
-	{
-		dump_start_semaphore_ = CreateSemaphore(NULL, 0, 1, NULL);
-		dump_finish_semaphore_ = CreateSemaphore(NULL, 0, 1, NULL);
 	}
 }
 
@@ -135,8 +135,8 @@ DWORD WINAPI SehException::WriteMiniDump(LPVOID param)
 				);
 				CloseHandle(file_handle);
 			}
+			ReleaseSemaphore(self->dump_finish_semaphore_, 1, NULL);
 		}
-		ReleaseSemaphore(self->dump_finish_semaphore_, 1, NULL);
 	}
 	return 0;
 }
